@@ -1,0 +1,289 @@
+/* ====== General Page Styles ====== */
+.case-detail-page {
+  padding: 20px;
+  font-family: "Segoe UI", sans-serif;
+  color: #222;
+}
+
+.case-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.case-title-section h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.case-badges {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+}
+
+.status-badge,
+.priority-badge,
+.case-number-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-badge.active { background: #d1f7d1; color: #0a7a0a; }
+.status-badge.pending { background: #fff7c2; color: #7a6b0a; }
+.status-badge.closed { background: #f7d1d1; color: #7a0a0a; }
+
+.priority-badge.priority-high { background: #ffdddd; color: #b30000; }
+.priority-badge.priority-medium { background: #fff4cc; color: #996600; }
+.priority-badge.priority-low { background: #e6f7ff; color: #005580; }
+
+.case-number-badge {
+  background: #eee;
+  color: #555;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background: #4a90e2;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #357abd;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #ccc;
+}
+
+.btn-outline:hover {
+  border-color: #4a90e2;
+  color: #4a90e2;
+}
+
+.btn-small {
+  font-size: 0.8rem;
+  padding: 5px 10px;
+}
+
+/* ====== Tabs ====== */
+.tab-navigation {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #f4f4f4;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: #4a90e2;
+  color: white;
+}
+
+/* ====== Overview Tab ====== */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 15px;
+}
+
+.overview-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+
+.parties-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vs-divider {
+  font-weight: bold;
+  margin: 0 10px;
+}
+
+.case-summary-card {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.case-text pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+/* ====== Details Tab ====== */
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-field label {
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.tags-section {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.case-tag {
+  background: #e6f7ff;
+  color: #005580;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+/* ====== Analyses Tab ====== */
+.analysis-card {
+  background: #fff;
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.analysis-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.analysis-status.completed {
+  color: #0a7a0a;
+}
+
+.analysis-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* ====== Documents Tab ====== */
+.document-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.document-icon {
+  font-size: 1.5rem;
+  margin-right: 12px;
+}
+
+.document-meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.document-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ====== Timeline Tab ====== */
+.timeline-container {
+  margin-top: 20px;
+  border-left: 3px solid #4a90e2;
+  padding-left: 15px;
+}
+
+.timeline-item {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.timeline-marker {
+  width: 14px;
+  height: 14px;
+  background: #4a90e2;
+  border-radius: 50%;
+  position: absolute;
+  left: -22px;
+  top: 5px;
+}
+
+.timeline-date {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.timeline-type {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* ====== Loading State ====== */
+.case-detail-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.spinner {
+  border: 4px solid #eee;
+  border-top: 4px solid #4a90e2;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
