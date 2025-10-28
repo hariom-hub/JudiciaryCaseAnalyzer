@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+
+import caseService from './services/caseService';
 import './App.css';
 
 // Import Analysis Components
@@ -405,21 +407,59 @@ This extracted text can now be used as the case text for AI analysis.`;
       if (fileInput) fileInput.value = '';
     };
 
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      console.log('Form submitted:', formData);
-      alert('Case added successfully! (Mock functionality)');
-      setFormData({
-        title: '',
-        caseNumber: '',
-        caseType: 'Civil',
-        court: '',
-        plaintiff: '',
-        defendant: '',
-        dateOfFiling: '',
-        caseText: ''
-      });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  try {
+    setIsLoading(true);
+    
+    const caseData = {
+      title: formData.title.trim(),
+      caseType: formData.caseType.toLowerCase(),
+      caseText: formData.caseText.trim(),
+      caseNumber: formData.caseNumber.trim() || `CV-${Date.now()}`,
+      court: formData.court.trim() || 'Not specified',
+      status: 'pending',
+      plaintiffs: formData.plaintiff ? [formData.plaintiff.trim()] : [],
+      defendants: formData.defendant ? [formData.defendant.trim()] : [],
+      filingDate: formData.dateOfFiling || new Date().toISOString().split('T')[0]
     };
+
+    console.log('📤 Sending:', caseData);
+
+    // Direct axios call to test
+    const response = await fetch('http://localhost:5000/api/cases', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(caseData)
+    });
+
+    const result = await response.json();
+    console.log('📥 Response:', result);
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to create case');
+    }
+
+    alert('✅ Case added successfully!');
+    
+    setFormData({
+      title: '', caseNumber: '', caseType: 'Civil',
+      court: '', plaintiff: '', defendant: '',
+      dateOfFiling: '', caseText: ''
+    });
+    
+    setActiveTab('cases');
+    
+  } catch (error) {
+    console.error('❌ Full error:', error);
+    alert('Error: ' + error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
     return (
       <div className="add-case-section">
