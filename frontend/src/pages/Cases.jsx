@@ -1,144 +1,66 @@
 import React, { useState, useEffect } from 'react';
-// import './Home.css';
+import axios from 'axios';
 import './Cases.css';
+
+// 👇 backend URL handle karega from .env
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Cases = ({ onNavigate }) => {
   const [cases, setCases] = useState([]);
   const [filteredCases, setFilteredCases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid'); // grid or list
 
-  // Sample cases data
+  // 🟢 Fetch cases from backend
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const sampleCases = [
-        {
-          id: 1,
-          title: "Smith vs. State Corporation",
-          caseNumber: "CV-2023-001",
-          caseType: "Civil",
-          status: "Active",
-          priority: "High",
-          dateOfFiling: "2023-09-15",
-          lastUpdated: "2023-09-23",
-          parties: {
-            plaintiff: "John Smith",
-            defendant: "State Corporation"
-          },
-          court: "Supreme Court",
-          tags: ["Contract Dispute", "Commercial"],
-          analysesCount: 3
-        },
-        {
-          id: 2,
-          title: "Criminal Case - Robbery Investigation",
-          caseNumber: "CR-2023-045",
-          caseType: "Criminal",
-          status: "Pending",
-          priority: "Medium",
-          dateOfFiling: "2023-09-10",
-          lastUpdated: "2023-09-22",
-          parties: {
-            plaintiff: "State",
-            defendant: "Mike Johnson"
-          },
-          court: "District Court",
-          tags: ["Robbery", "Investigation"],
-          analysesCount: 1
-        },
-        {
-          id: 3,
-          title: "Johnson vs. City Planning Department",
-          caseNumber: "AD-2023-012",
-          caseType: "Administrative",
-          status: "Active",
-          priority: "Low",
-          dateOfFiling: "2023-09-08",
-          lastUpdated: "2023-09-21",
-          parties: {
-            plaintiff: "Sarah Johnson",
-            defendant: "City Planning Department"
-          },
-          court: "Administrative Court",
-          tags: ["Planning", "Municipal"],
-          analysesCount: 2
-        },
-        {
-          id: 4,
-          title: "Brown vs. Insurance Company",
-          caseNumber: "CV-2023-089",
-          caseType: "Civil",
-          status: "Closed",
-          priority: "Medium",
-          dateOfFiling: "2023-08-15",
-          lastUpdated: "2023-09-20",
-          parties: {
-            plaintiff: "Robert Brown",
-            defendant: "XYZ Insurance Co."
-          },
-          court: "High Court",
-          tags: ["Insurance", "Claim Dispute"],
-          analysesCount: 5
-        },
-        {
-          id: 5,
-          title: "Constitutional Challenge - Privacy Rights",
-          caseNumber: "CC-2023-003",
-          caseType: "Constitutional",
-          status: "Active",
-          priority: "High",
-          dateOfFiling: "2023-07-20",
-          lastUpdated: "2023-09-19",
-          parties: {
-            plaintiff: "Citizens Rights Group",
-            defendant: "Federal Government"
-          },
-          court: "Supreme Court",
-          tags: ["Privacy", "Constitutional", "Rights"],
-          analysesCount: 8
-        },
-        {
-          id: 6,
-          title: "Wilson vs. Tech Solutions Ltd",
-          caseNumber: "CV-2023-156",
-          caseType: "Commercial",
-          status: "Pending",
-          priority: "Medium",
-          dateOfFiling: "2023-08-30",
-          lastUpdated: "2023-09-18",
-          parties: {
-            plaintiff: "David Wilson",
-            defendant: "Tech Solutions Ltd"
-          },
-          court: "Commercial Court",
-          tags: ["Technology", "Contract"],
-          analysesCount: 0
+    const fetchCases = async () => {
+      try {
+        setIsLoading(true);
+        setError('');
+
+        const response = await axios.get(`${API_BASE_URL}/cases`);
+        if (response.data && Array.isArray(response.data)) {
+          setCases(response.data);
+          setFilteredCases(response.data);
+        } else if (response.data.cases) {
+          // backend response structure = { success: true, cases: [...] }
+          setCases(response.data.cases);
+          setFilteredCases(response.data.cases);
+        } else {
+          setError('Unexpected API response structure');
         }
-      ];
-      
-      setCases(sampleCases);
-      setFilteredCases(sampleCases);
-      setIsLoading(false);
-    }, 1000);
+      } catch (err) {
+        console.error('Error fetching cases:', err);
+        setError('Failed to fetch cases from backend');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCases();
   }, []);
 
-  // Filter and search logic
+  // 🟡 Filter and search logic
   useEffect(() => {
-    let filtered = cases.filter(case_item => {
-      const matchesSearch = searchTerm === '' || 
-        case_item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        case_item.caseNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        case_item.parties.plaintiff.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        case_item.parties.defendant.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = filterStatus === 'all' || case_item.status.toLowerCase() === filterStatus;
-      const matchesType = filterType === 'all' || case_item.caseType.toLowerCase() === filterType.toLowerCase();
-      
+    let filtered = cases.filter((case_item) => {
+      const matchesSearch =
+        searchTerm === '' ||
+        case_item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        case_item.caseNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        case_item.parties?.plaintiff?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        case_item.parties?.defendant?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        filterStatus === 'all' || case_item.status?.toLowerCase() === filterStatus;
+      const matchesType =
+        filterType === 'all' ||
+        case_item.caseType?.toLowerCase() === filterType.toLowerCase();
+
       return matchesSearch && matchesStatus && matchesType;
     });
 
@@ -152,7 +74,7 @@ const Cases = ({ onNavigate }) => {
         case 'title':
           return a.title.localeCompare(b.title);
         case 'priority':
-          const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+          const priorityOrder = { High: 3, Medium: 2, Low: 1 };
           return priorityOrder[b.priority] - priorityOrder[a.priority];
         default:
           return 0;
@@ -167,18 +89,18 @@ const Cases = ({ onNavigate }) => {
   };
 
   const CaseCard = ({ case_item, isListView = false }) => (
-    <div 
-      className={`case-card ${isListView ? 'list-view' : 'grid-view'} priority-${case_item.priority.toLowerCase()}`}
-      onClick={() => handleCaseClick(case_item.id)}
+    <div
+      className={`case-card ${isListView ? 'list-view' : 'grid-view'} priority-${case_item.priority?.toLowerCase()}`}
+      onClick={() => handleCaseClick(case_item._id)}
     >
       <div className="case-card-header">
         <div className="case-title-section">
           <h3 className="case-title">{case_item.title}</h3>
           <div className="case-badges">
-            <span className={`status-badge ${case_item.status.toLowerCase()}`}>
+            <span className={`status-badge ${case_item.status?.toLowerCase()}`}>
               {case_item.status}
             </span>
-            <span className={`priority-badge priority-${case_item.priority.toLowerCase()}`}>
+            <span className={`priority-badge priority-${case_item.priority?.toLowerCase()}`}>
               {case_item.priority}
             </span>
           </div>
@@ -201,24 +123,28 @@ const Cases = ({ onNavigate }) => {
           </div>
           <div className="info-item">
             <span className="info-label">Filed:</span>
-            <span className="info-value">{new Date(case_item.dateOfFiling).toLocaleDateString()}</span>
+            <span className="info-value">
+              {new Date(case_item.dateOfFiling).toLocaleDateString()}
+            </span>
           </div>
         </div>
 
         <div className="parties-section">
           <div className="party">
             <span className="party-label">Plaintiff:</span>
-            <span className="party-name">{case_item.parties.plaintiff}</span>
+            <span className="party-name">{case_item.parties?.plaintiff}</span>
           </div>
           <div className="party">
             <span className="party-label">Defendant:</span>
-            <span className="party-name">{case_item.parties.defendant}</span>
+            <span className="party-name">{case_item.parties?.defendant}</span>
           </div>
         </div>
 
         <div className="case-tags">
-          {case_item.tags.map((tag, index) => (
-            <span key={index} className="case-tag">{tag}</span>
+          {case_item.tags?.map((tag, index) => (
+            <span key={index} className="case-tag">
+              {tag}
+            </span>
           ))}
         </div>
       </div>
@@ -227,29 +153,33 @@ const Cases = ({ onNavigate }) => {
         <div className="case-stats">
           <span className="stat-item">
             <span className="stat-icon">🤖</span>
-            <span className="stat-text">{case_item.analysesCount} analyses</span>
+            <span className="stat-text">
+              {case_item.analysesCount || 0} analyses
+            </span>
           </span>
           <span className="stat-item">
             <span className="stat-icon">🕒</span>
-            <span className="stat-text">Updated {new Date(case_item.lastUpdated).toLocaleDateString()}</span>
+            <span className="stat-text">
+              Updated {new Date(case_item.lastUpdated).toLocaleDateString()}
+            </span>
           </span>
         </div>
-        
+
         <div className="case-actions">
-          <button 
+          <button
             className="btn btn-outline btn-small"
             onClick={(e) => {
               e.stopPropagation();
-              handleCaseClick(case_item.id);
+              handleCaseClick(case_item._id);
             }}
           >
             View Details
           </button>
-          <button 
+          <button
             className="btn btn-primary btn-small"
             onClick={(e) => {
               e.stopPropagation();
-              onNavigate('analysis', case_item.id);
+              onNavigate('analysis', case_item._id);
             }}
           >
             Analyze
@@ -270,25 +200,29 @@ const Cases = ({ onNavigate }) => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="no-cases">
+        <h3>⚠️ {error}</h3>
+        <p>Make sure backend is running and API URL is correct.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="cases-page">
-      {/* Header */}
       <div className="cases-header">
         <div className="header-left">
           <h1>Legal Cases</h1>
           <p>Manage and analyze your legal case portfolio</p>
         </div>
         <div className="header-right">
-          <button 
-            className="btn btn-primary"
-            onClick={() => onNavigate('add-case')}
-          >
+          <button className="btn btn-primary" onClick={() => onNavigate('add-case')}>
             <span>➕</span> Add New Case
           </button>
         </div>
       </div>
 
-      {/* Filters and Search */}
       <div className="cases-controls">
         <div className="search-section">
           <div className="search-box">
@@ -301,10 +235,7 @@ const Cases = ({ onNavigate }) => {
               className="search-input"
             />
             {searchTerm && (
-              <button 
-                className="clear-search"
-                onClick={() => setSearchTerm('')}
-              >
+              <button className="clear-search" onClick={() => setSearchTerm('')}>
                 ✕
               </button>
             )}
@@ -314,8 +245,8 @@ const Cases = ({ onNavigate }) => {
         <div className="filter-controls">
           <div className="filter-group">
             <label>Status:</label>
-            <select 
-              value={filterStatus} 
+            <select
+              value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="filter-select"
             >
@@ -328,8 +259,8 @@ const Cases = ({ onNavigate }) => {
 
           <div className="filter-group">
             <label>Type:</label>
-            <select 
-              value={filterType} 
+            <select
+              value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="filter-select"
             >
@@ -344,8 +275,8 @@ const Cases = ({ onNavigate }) => {
 
           <div className="filter-group">
             <label>Sort by:</label>
-            <select 
-              value={sortBy} 
+            <select
+              value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="filter-select"
             >
@@ -357,14 +288,14 @@ const Cases = ({ onNavigate }) => {
           </div>
 
           <div className="view-toggle">
-            <button 
+            <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
               title="Grid View"
             >
               ⊞
             </button>
-            <button 
+            <button
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
               title="List View"
@@ -375,19 +306,15 @@ const Cases = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Results Summary */}
       <div className="results-summary">
         <span className="results-count">
           {filteredCases.length} of {cases.length} cases
         </span>
         {searchTerm && (
-          <span className="search-indicator">
-            Search results for "{searchTerm}"
-          </span>
+          <span className="search-indicator">Search results for "{searchTerm}"</span>
         )}
       </div>
 
-      {/* Cases Grid/List */}
       {filteredCases.length === 0 ? (
         <div className="no-cases">
           <div className="no-cases-illustration">
@@ -395,24 +322,20 @@ const Cases = ({ onNavigate }) => {
           </div>
           <h3>No cases found</h3>
           <p>
-            {searchTerm || filterStatus !== 'all' || filterType !== 'all' 
+            {searchTerm || filterStatus !== 'all' || filterType !== 'all'
               ? 'Try adjusting your search or filters'
-              : 'Get started by adding your first case'
-            }
+              : 'Get started by adding your first case'}
           </p>
-          <button 
-            className="btn btn-primary"
-            onClick={() => onNavigate('add-case')}
-          >
+          <button className="btn btn-primary" onClick={() => onNavigate('add-case')}>
             Add New Case
           </button>
         </div>
       ) : (
         <div className={`cases-container ${viewMode}-view`}>
-          {filteredCases.map(case_item => (
-            <CaseCard 
-              key={case_item.id} 
-              case_item={case_item} 
+          {filteredCases.map((case_item) => (
+            <CaseCard
+              key={case_item._id}
+              case_item={case_item}
               isListView={viewMode === 'list'}
             />
           ))}

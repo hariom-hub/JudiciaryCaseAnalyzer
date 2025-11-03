@@ -204,6 +204,7 @@ const AddCase = () => {
               <h3 className="mb-0">
                 <i className="bi bi-file-earmark-plus me-2"></i>
                 Add New Case
+                
               </h3>
             </div>
 

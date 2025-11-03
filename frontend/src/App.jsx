@@ -18,6 +18,9 @@ import Home from './pages/Home';
 import Cases from './pages/Cases';
 import CaseDetailPage from './pages/CaseDetailPage';
 
+// import AddCase from './components/Cases/AddCase';
+// import CaseCard from './components/Cases/CaseCard';
+
 const App = () => {
   const [cases, setCases] = useState([]);
   const [currentCase, setCurrentCase] = useState(null);
@@ -700,3 +703,4 @@ const handleSubmit = async (e) => {
 };
 
 export default App;
+

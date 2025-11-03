@@ -663,19 +663,43 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const cases = await Case.find().sort({ createdAt: -1 });
-    res.json({
+    res.status(200).json({
       success: true,
       count: cases.length,
-      data: cases
+      cases, // 👈 data → cases
     });
   } catch (error) {
-    console.error('Error fetching cases:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching cases',
-      error: error.message
+      message: error.message,
     });
   }
 });
+
+// Get single case by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const caseData = await Case.findById(req.params.id);
+
+    if (!caseData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Case not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: caseData,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+
 
 module.exports = router;
