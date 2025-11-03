@@ -18,6 +18,7 @@ import Home from './pages/Home';
 import Cases from './pages/Cases';
 import CaseDetailPage from './pages/CaseDetailPage';
 
+
 // import AddCase from './components/Cases/AddCase';
 // import CaseCard from './components/Cases/CaseCard';
 
@@ -45,32 +46,32 @@ const App = () => {
   };
 
   // Sample case data for demo
-  const sampleCases = [
-    {
-      id: 1,
-      title: "Smith vs. State Corporation",
-      caseNumber: "CV-2023-001",
-      caseType: "Civil",
-      status: "Active",
-      dateOfFiling: "2023-09-15",
-      parties: {
-        plaintiff: "John Smith",
-        defendant: "State Corporation"
-      }
-    },
-    {
-      id: 2,
-      title: "Criminal Case - Robbery",
-      caseNumber: "CR-2023-045",
-      caseType: "Criminal",
-      status: "Pending",
-      dateOfFiling: "2023-08-22",
-      parties: {
-        plaintiff: "State",
-        defendant: "Mike Johnson"
-      }
-    }
-  ];
+  // const sampleCases = [
+  //   {
+  //     id: 1,
+  //     title: "Smith vs. State Corporation",
+  //     caseNumber: "CV-2023-001",
+  //     caseType: "Civil",
+  //     status: "Active",
+  //     dateOfFiling: "2023-09-15",
+  //     parties: {
+  //       plaintiff: "John Smith",
+  //       defendant: "State Corporation"
+  //     }
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Criminal Case - Robbery",
+  //     caseNumber: "CR-2023-045",
+  //     caseType: "Criminal",
+  //     status: "Pending",
+  //     dateOfFiling: "2023-08-22",
+  //     parties: {
+  //       plaintiff: "State",
+  //       defendant: "Mike Johnson"
+  //     }
+  //   }
+  // ];
 
   // Dashboard Component
   const Dashboard = () => (

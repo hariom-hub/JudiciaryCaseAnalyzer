@@ -9,125 +9,57 @@ const CaseDetailPage = ({ caseId, onNavigate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
 
-  // Sample case data based on caseId
+  // ✅ Fetch case details from backend dynamically
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      // Mock data - in real app, fetch based on caseId
-      const mockCase = {
-        id: caseId,
-        title: "Smith vs. State Corporation",
-        caseNumber: "CV-2023-001",
-        caseType: "Civil",
-        status: "Active",
-        priority: "High",
-        dateOfFiling: "2023-09-15",
-        lastUpdated: "2023-09-23",
-        createdAt: "2023-09-15",
-        parties: {
-          plaintiff: "John Smith",
-          defendant: "State Corporation",
-          plaintiffLawyer: "Anderson & Associates",
-          defendantLawyer: "Corporate Legal Services"
-        },
-        court: "Supreme Court",
-        judge: "Justice Maria Rodriguez",
-        tags: ["Contract Dispute", "Commercial", "Breach of Contract"],
-        caseText: `CASE SUMMARY:
+    const fetchCase = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/cases/${caseId}`);
+        if (!response.ok) throw new Error('Failed to fetch case');
+        const data = await response.json();
 
-This civil case involves a contract dispute between John Smith (Plaintiff) and State Corporation (Defendant). The plaintiff alleges that the defendant breached a service agreement dated March 15, 2023, which resulted in significant financial losses.
+        // 🧩 Normalize missing fields (safe defaults)
+        const normalizedCase = {
+          title: data.title || "Untitled Case",
+          caseNumber: data.caseNumber || "N/A",
+          caseType: data.caseType || "Unknown",
+          status: data.status || "Pending",
+          priority: data.priority || "Medium",
+          court: data.court || "Not Specified",
+          judge: data.judge || "Not Assigned",
+          dateOfFiling: data.dateOfFiling || new Date().toISOString(),
+          lastUpdated: data.lastUpdated || new Date().toISOString(),
+          caseText: data.caseText || "No summary available.",
+          parties: data.parties || {
+            plaintiff: "Unknown",
+            defendant: "Unknown",
+            plaintiffLawyer: "N/A",
+            defendantLawyer: "N/A",
+          },
+          documents: data.documents || [],
+          tags: data.tags || [],
+          timeline: data.timeline || [],
+        };
 
-KEY FACTS:
-1. Service Agreement signed on March 15, 2023
-2. Plaintiff provided consulting services for 6 months
-3. Defendant failed to make final payment of $50,000
-4. Multiple attempts at resolution failed
-5. Plaintiff seeks damages plus legal costs
+        setCaseData(normalizedCase);
+        setAnalyses(data.analyses || []);
+        setEditForm(normalizedCase);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching case:", error);
+        setIsLoading(false);
+      }
+    };
 
-LEGAL ISSUES:
-- Breach of contract
-- Damages calculation
-- Mitigation of losses
-- Interest and costs
-
-CURRENT STATUS:
-The case is currently in the discovery phase. Both parties have submitted their initial pleadings, and depositions are scheduled for next month. The court has set a trial date for December 2023.
-
-EVIDENCE:
-- Original service agreement
-- Email correspondence
-- Payment records
-- Invoice documentation
-- Expert witness testimony on damages
-
-The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
-        documents: [
-          { name: "Service Agreement.pdf", type: "Contract", uploadDate: "2023-09-15", size: "2.4 MB" },
-          { name: "Email Correspondence.docx", type: "Evidence", uploadDate: "2023-09-16", size: "1.1 MB" },
-          { name: "Financial Records.xlsx", type: "Evidence", uploadDate: "2023-09-17", size: "856 KB" }
-        ],
-        timeline: [
-          { date: "2023-03-15", event: "Service agreement signed", type: "contract" },
-          { date: "2023-08-15", event: "Final payment due date", type: "deadline" },
-          { date: "2023-08-30", event: "Demand letter sent", type: "communication" },
-          { date: "2023-09-15", event: "Case filed", type: "filing" },
-          { date: "2023-09-20", event: "Defendant's response filed", type: "response" },
-          { date: "2023-10-01", event: "Discovery phase begins", type: "process" },
-          { date: "2023-12-15", event: "Trial scheduled", type: "hearing" }
-        ]
-      };
-
-      const mockAnalyses = [
-        {
-          id: 1,
-          type: "Case Summary",
-          aiProvider: "OpenAI",
-          model: "GPT-4",
-          status: "Completed",
-          createdAt: "2023-09-23 10:30 AM",
-          result: "This is a straightforward breach of contract case with strong evidence supporting the plaintiff's claims. The defendant's failure to make the final payment constitutes a clear breach of the service agreement...",
-          tokensUsed: 2450,
-          processingTime: 3200
-        },
-        {
-          id: 2,
-          type: "Legal Issues",
-          aiProvider: "Groq",
-          model: "Llama 3 70B",
-          status: "Completed",
-          createdAt: "2023-09-23 11:15 AM",
-          result: "Key legal issues identified:\n1. Material breach of contract\n2. Calculation of direct damages\n3. Consequential damages eligibility\n4. Mitigation obligations...",
-          tokensUsed: 1890,
-          processingTime: 1800
-        },
-        {
-          id: 3,
-          type: "Outcome Prediction",
-          aiProvider: "Gemini",
-          model: "Gemini Pro",
-          status: "Completed",
-          createdAt: "2023-09-23 02:45 PM",
-          result: "Based on similar cases and the strength of evidence, there is a 78% likelihood of a favorable outcome for the plaintiff. Estimated settlement range: $60,000-$70,000...",
-          tokensUsed: 3100,
-          processingTime: 2900
-        }
-      ];
-
-      setCaseData(mockCase);
-      setAnalyses(mockAnalyses);
-      setEditForm(mockCase);
-      setIsLoading(false);
-    }, 1000);
+    fetchCase();
   }, [caseId]);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  // --------------------------- HANDLERS ---------------------------
+
+  const handleEdit = () => setIsEditing(true);
 
   const handleSave = () => {
-    setCaseData({...caseData, ...editForm});
+    setCaseData({ ...caseData, ...editForm });
     setIsEditing(false);
-    // In real app, make API call to update case
     alert('Case updated successfully!');
   };
 
@@ -143,38 +75,23 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
     }));
   };
 
+  // --------------------------- COMPONENTS ---------------------------
+
   const TabNavigation = () => (
     <div className="tab-navigation">
-      <button 
-        className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-        onClick={() => setActiveTab('overview')}
-      >
-        📄 Overview
-      </button>
-      <button 
-        className={`tab-btn ${activeTab === 'details' ? 'active' : ''}`}
-        onClick={() => setActiveTab('details')}
-      >
-        📋 Details
-      </button>
-      <button 
-        className={`tab-btn ${activeTab === 'analyses' ? 'active' : ''}`}
-        onClick={() => setActiveTab('analyses')}
-      >
-        🤖 AI Analyses ({analyses.length})
-      </button>
-      <button 
-        className={`tab-btn ${activeTab === 'documents' ? 'active' : ''}`}
-        onClick={() => setActiveTab('documents')}
-      >
-        📎 Documents ({caseData?.documents?.length || 0})
-      </button>
-      <button 
-        className={`tab-btn ${activeTab === 'timeline' ? 'active' : ''}`}
-        onClick={() => setActiveTab('timeline')}
-      >
-        🕒 Timeline
-      </button>
+      {["overview", "details", "analyses", "documents", "timeline"].map(tab => (
+        <button
+          key={tab}
+          className={`tab-btn ${activeTab === tab ? "active" : ""}`}
+          onClick={() => setActiveTab(tab)}
+        >
+          {tab === "overview" && "📄 Overview"}
+          {tab === "details" && "📋 Details"}
+          {tab === "analyses" && `🤖 AI Analyses (${analyses.length})`}
+          {tab === "documents" && `📎 Documents (${caseData?.documents?.length || 0})`}
+          {tab === "timeline" && "🕒 Timeline"}
+        </button>
+      ))}
     </div>
   );
 
@@ -184,34 +101,12 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
         <div className="overview-card">
           <h3>Case Information</h3>
           <div className="info-grid">
-            <div className="info-row">
-              <span className="label">Case Number:</span>
-              <span className="value">{caseData.caseNumber}</span>
-            </div>
-            <div className="info-row">
-              <span className="label">Type:</span>
-              <span className="value">{caseData.caseType}</span>
-            </div>
-            <div className="info-row">
-              <span className="label">Status:</span>
-              <span className={`value status-${caseData.status.toLowerCase()}`}>
-                {caseData.status}
-              </span>
-            </div>
-            <div className="info-row">
-              <span className="label">Priority:</span>
-              <span className={`value priority-${caseData.priority.toLowerCase()}`}>
-                {caseData.priority}
-              </span>
-            </div>
-            <div className="info-row">
-              <span className="label">Court:</span>
-              <span className="value">{caseData.court}</span>
-            </div>
-            <div className="info-row">
-              <span className="label">Judge:</span>
-              <span className="value">{caseData.judge}</span>
-            </div>
+            <div className="info-row"><span className="label">Case Number:</span><span className="value">{caseData.caseNumber}</span></div>
+            <div className="info-row"><span className="label">Type:</span><span className="value">{caseData.caseType}</span></div>
+            <div className="info-row"><span className="label">Status:</span><span className={`value status-${caseData.status.toLowerCase()}`}>{caseData.status}</span></div>
+            <div className="info-row"><span className="label">Priority:</span><span className={`value priority-${caseData.priority.toLowerCase()}`}>{caseData.priority}</span></div>
+            <div className="info-row"><span className="label">Court:</span><span className="value">{caseData.court}</span></div>
+            <div className="info-row"><span className="label">Judge:</span><span className="value">{caseData.judge}</span></div>
           </div>
         </div>
 
@@ -235,36 +130,18 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
         <div className="overview-card">
           <h3>Key Dates</h3>
           <div className="dates-info">
-            <div className="date-item">
-              <span className="date-label">Filed:</span>
-              <span className="date-value">{new Date(caseData.dateOfFiling).toLocaleDateString()}</span>
-            </div>
-            <div className="date-item">
-              <span className="date-label">Last Updated:</span>
-              <span className="date-value">{new Date(caseData.lastUpdated).toLocaleDateString()}</span>
-            </div>
-            <div className="date-item">
-              <span className="date-label">Next Hearing:</span>
-              <span className="date-value">Dec 15, 2023</span>
-            </div>
+            <div className="date-item"><span className="date-label">Filed:</span><span className="date-value">{new Date(caseData.dateOfFiling).toLocaleDateString()}</span></div>
+            <div className="date-item"><span className="date-label">Last Updated:</span><span className="date-value">{new Date(caseData.lastUpdated).toLocaleDateString()}</span></div>
+            <div className="date-item"><span className="date-label">Next Hearing:</span><span className="date-value">Dec 15, 2023</span></div>
           </div>
         </div>
 
         <div className="overview-card">
           <h3>Quick Stats</h3>
           <div className="stats-info">
-            <div className="stat-item">
-              <span className="stat-number">{analyses.length}</span>
-              <span className="stat-label">AI Analyses</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">{caseData.documents?.length || 0}</span>
-              <span className="stat-label">Documents</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">{caseData.tags?.length || 0}</span>
-              <span className="stat-label">Tags</span>
-            </div>
+            <div className="stat-item"><span className="stat-number">{analyses.length}</span><span className="stat-label">AI Analyses</span></div>
+            <div className="stat-item"><span className="stat-number">{caseData.documents?.length || 0}</span><span className="stat-label">Documents</span></div>
+            <div className="stat-item"><span className="stat-number">{caseData.tags?.length || 0}</span><span className="stat-label">Tags</span></div>
           </div>
         </div>
       </div>
@@ -284,17 +161,11 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
         <h3>Case Details</h3>
         <div className="details-actions">
           {!isEditing ? (
-            <button className="btn btn-outline" onClick={handleEdit}>
-              ✏️ Edit
-            </button>
+            <button className="btn btn-outline" onClick={handleEdit}>✏️ Edit</button>
           ) : (
             <div className="edit-actions">
-              <button className="btn btn-outline" onClick={handleCancel}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={handleSave}>
-                Save Changes
-              </button>
+              <button className="btn btn-outline" onClick={handleCancel}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSave}>Save Changes</button>
             </div>
           )}
         </div>
@@ -307,11 +178,7 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
             <div className="form-field">
               <label>Case Title:</label>
               {isEditing ? (
-                <input
-                  type="text"
-                  value={editForm.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                />
+                <input type="text" value={editForm.title} onChange={(e) => handleInputChange('title', e.target.value)} />
               ) : (
                 <span className="field-value">{caseData.title}</span>
               )}
@@ -319,11 +186,7 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
             <div className="form-field">
               <label>Case Number:</label>
               {isEditing ? (
-                <input
-                  type="text"
-                  value={editForm.caseNumber}
-                  onChange={(e) => handleInputChange('caseNumber', e.target.value)}
-                />
+                <input type="text" value={editForm.caseNumber} onChange={(e) => handleInputChange('caseNumber', e.target.value)} />
               ) : (
                 <span className="field-value">{caseData.caseNumber}</span>
               )}
@@ -331,10 +194,7 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
             <div className="form-field">
               <label>Case Type:</label>
               {isEditing ? (
-                <select
-                  value={editForm.caseType}
-                  onChange={(e) => handleInputChange('caseType', e.target.value)}
-                >
+                <select value={editForm.caseType} onChange={(e) => handleInputChange('caseType', e.target.value)}>
                   <option value="Civil">Civil</option>
                   <option value="Criminal">Criminal</option>
                   <option value="Administrative">Administrative</option>
@@ -348,19 +208,14 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
             <div className="form-field">
               <label>Status:</label>
               {isEditing ? (
-                <select
-                  value={editForm.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
-                >
+                <select value={editForm.status} onChange={(e) => handleInputChange('status', e.target.value)}>
                   <option value="Active">Active</option>
                   <option value="Pending">Pending</option>
                   <option value="Closed">Closed</option>
                   <option value="On Hold">On Hold</option>
                 </select>
               ) : (
-                <span className={`field-value status-${caseData.status.toLowerCase()}`}>
-                  {caseData.status}
-                </span>
+                <span className={`field-value status-${caseData.status.toLowerCase()}`}>{caseData.status}</span>
               )}
             </div>
           </div>
@@ -372,11 +227,7 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
             <div className="form-field">
               <label>Court:</label>
               {isEditing ? (
-                <input
-                  type="text"
-                  value={editForm.court}
-                  onChange={(e) => handleInputChange('court', e.target.value)}
-                />
+                <input type="text" value={editForm.court} onChange={(e) => handleInputChange('court', e.target.value)} />
               ) : (
                 <span className="field-value">{caseData.court}</span>
               )}
@@ -384,144 +235,18 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
             <div className="form-field">
               <label>Judge:</label>
               {isEditing ? (
-                <input
-                  type="text"
-                  value={editForm.judge}
-                  onChange={(e) => handleInputChange('judge', e.target.value)}
-                />
+                <input type="text" value={editForm.judge} onChange={(e) => handleInputChange('judge', e.target.value)} />
               ) : (
                 <span className="field-value">{caseData.judge}</span>
               )}
             </div>
           </div>
         </div>
-
-        <div className="form-section">
-          <h4>Tags</h4>
-          <div className="tags-section">
-            {caseData.tags.map((tag, index) => (
-              <span key={index} className="case-tag">{tag}</span>
-            ))}
-            {isEditing && (
-              <button className="btn btn-outline btn-small">+ Add Tag</button>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
 
-  const AnalysesTab = () => (
-    <div className="analyses-tab">
-      <div className="analyses-header">
-        <h3>AI Analyses</h3>
-        <button 
-          className="btn btn-primary"
-          onClick={() => onNavigate('analysis', caseId)}
-        >
-          🤖 New Analysis
-        </button>
-      </div>
-
-      <div className="analyses-list">
-        {analyses.map(analysis => (
-          <div key={analysis.id} className="analysis-card">
-            <div className="analysis-header">
-              <div className="analysis-title">
-                <h4>{analysis.type}</h4>
-                <span className={`analysis-status ${analysis.status.toLowerCase()}`}>
-                  {analysis.status}
-                </span>
-              </div>
-              <div className="analysis-meta">
-                <span className="provider-badge">{analysis.aiProvider}</span>
-                <span className="model-info">{analysis.model}</span>
-              </div>
-            </div>
-            
-            <div className="analysis-content">
-              <p>{analysis.result}</p>
-            </div>
-            
-            <div className="analysis-footer">
-              <div className="analysis-stats">
-                <span>📊 {analysis.tokensUsed} tokens</span>
-                <span>⏱️ {analysis.processingTime}ms</span>
-                <span>🕒 {analysis.createdAt}</span>
-              </div>
-              <button className="btn btn-outline btn-small">
-                View Full Analysis
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const DocumentsTab = () => (
-    <div className="documents-tab">
-      <div className="documents-header">
-        <h3>Case Documents</h3>
-        <button className="btn btn-primary">
-          📎 Upload Document
-        </button>
-      </div>
-
-      <div className="documents-list">
-        {caseData.documents?.map((doc, index) => (
-          <div key={index} className="document-item">
-            <div className="document-icon">
-              {doc.type === 'Contract' ? '📄' : 
-               doc.type === 'Evidence' ? '🔍' : '📋'}
-            </div>
-            <div className="document-info">
-              <h4>{doc.name}</h4>
-              <div className="document-meta">
-                <span className="doc-type">{doc.type}</span>
-                <span className="doc-size">{doc.size}</span>
-                <span className="doc-date">Uploaded {new Date(doc.uploadDate).toLocaleDateString()}</span>
-              </div>
-            </div>
-            <div className="document-actions">
-              <button className="btn btn-outline btn-small">View</button>
-              <button className="btn btn-outline btn-small">Download</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const TimelineTab = () => (
-    <div className="timeline-tab">
-      <div className="timeline-header">
-        <h3>Case Timeline</h3>
-        <button className="btn btn-primary">
-          ➕ Add Event
-        </button>
-      </div>
-
-      <div className="timeline-container">
-        {caseData.timeline?.map((event, index) => (
-          <div key={index} className={`timeline-item timeline-${event.type}`}>
-            <div className="timeline-marker"></div>
-            <div className="timeline-content">
-              <div className="timeline-date">
-                {new Date(event.date).toLocaleDateString()}
-              </div>
-              <div className="timeline-event">
-                {event.event}
-              </div>
-              <div className="timeline-type">
-                {event.type}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  // --------------------------- RENDER ---------------------------
 
   if (isLoading) {
     return (
@@ -539,10 +264,7 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
       <div className="case-not-found">
         <h2>Case Not Found</h2>
         <p>The requested case could not be found.</p>
-        <button 
-          className="btn btn-primary"
-          onClick={() => onNavigate('cases')}
-        >
+        <button className="btn btn-primary" onClick={() => onNavigate('cases')}>
           Back to Cases
         </button>
       </div>
@@ -554,51 +276,32 @@ The plaintiff seeks $75,000 in damages plus legal costs and interest.`,
       {/* Header */}
       <div className="case-detail-header">
         <div className="header-left">
-          <button 
-            className="back-btn"
-            onClick={() => onNavigate('cases')}
-          >
+          <button className="back-btn" onClick={() => onNavigate('cases')}>
             ← Back to Cases
           </button>
           <div className="case-title-section">
             <h1>{caseData.title}</h1>
             <div className="case-badges">
-              <span className={`status-badge ${caseData.status.toLowerCase()}`}>
-                {caseData.status}
-              </span>
-              <span className={`priority-badge priority-${caseData.priority.toLowerCase()}`}>
-                {caseData.priority} Priority
-              </span>
-              <span className="case-number-badge">
-                {caseData.caseNumber}
-              </span>
+              <span className={`status-badge ${caseData.status.toLowerCase()}`}>{caseData.status}</span>
+              <span className={`priority-badge priority-${caseData.priority.toLowerCase()}`}>{caseData.priority} Priority</span>
+              <span className="case-number-badge">{caseData.caseNumber}</span>
             </div>
           </div>
         </div>
-        
+
         <div className="header-actions">
-          <button 
-            className="btn btn-outline"
-            onClick={() => onNavigate('analysis', caseId)}
-          >
-            🤖 Run Analysis
-          </button>
-          <button className="btn btn-primary">
-            📊 Generate Report
-          </button>
+          <button className="btn btn-outline" onClick={() => onNavigate('analysis', caseId)}>🤖 Run Analysis</button>
+          <button className="btn btn-primary">📊 Generate Report</button>
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tabs */}
       <TabNavigation />
 
-      {/* Tab Content */}
+      {/* Content */}
       <div className="tab-content">
-        {activeTab === 'overview' && <OverviewTab />}
-        {activeTab === 'details' && <DetailsTab />}
-        {activeTab === 'analyses' && <AnalysesTab />}
-        {activeTab === 'documents' && <DocumentsTab />}
-        {activeTab === 'timeline' && <TimelineTab />}
+        {activeTab === "overview" && <OverviewTab />}
+        {activeTab === "details" && <DetailsTab />}
       </div>
     </div>
   );
